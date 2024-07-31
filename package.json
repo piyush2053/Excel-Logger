@@ -1,0 +1,12 @@
+{
+  "name": "excel-logger",
+  "version": "1.0.0",
+  "main": "index.js",
+  "keywords": ["Excel","logger"],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Piyush patel",
+  "license": "ISC",
+  "description": ""
+}
