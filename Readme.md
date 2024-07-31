@@ -15,6 +15,7 @@ Excel Logger is a simple service that helps you log any content or actions into 
 
 ## Whom to Talk ?
 <img src="./assets/ME.png" alt="Piyush Patel">
+
 > Piyush Patel
 > piyush.patel@rws.com
 > [Github](https://github.com/piyush2053)
