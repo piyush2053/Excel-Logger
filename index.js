@@ -39,8 +39,8 @@ app.post('/', (req, res) => {
           return res.status(404).send('Logs file not found.');
         }
 
-        res.setHeader('Content-Disposition', 'attachment; filename=logs.txt');
-        res.setHeader('Content-Type', 'text/plain');
+        res.setHeader('Content-Disposition', 'attachment; filename=logs.csv');
+        res.setHeader('Content-Type', 'text/csv');
 
         const fileStream = fs.createReadStream(filePath);
         fileStream.pipe(res);
