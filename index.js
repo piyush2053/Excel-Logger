@@ -2,11 +2,14 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const fs = require('fs');
 const createCsvWriter = require('csv-writer').createObjectCsvWriter;
+const cors = require('cors'); 
 
 const app = express();
 const port = 9000;
 
+app.use(cors()); 
 app.use(bodyParser.json());
+
 
 const csvWriter = createCsvWriter({
   path: 'logs.csv',

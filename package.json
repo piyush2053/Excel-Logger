@@ -8,13 +8,14 @@
   ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "nodemon":"nodemon index.js"
+    "nodemon": "nodemon index.js"
   },
   "author": "Piyush patel",
   "license": "ISC",
   "description": "",
   "dependencies": {
     "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
     "csv-writer": "^1.6.0",
     "express": "^4.19.2",
     "nodemon": "^3.1.4"
