@@ -59,6 +59,10 @@ app.get('/downloadLogs', (req, res) => {
   fileStream.pipe(res);
 });
 
+app.get('/',(req,res)=>{
+  res.send("HELLO")
+})
+
 app.listen(port, () => {
   console.log(`Server running at ${port}`);
 });
