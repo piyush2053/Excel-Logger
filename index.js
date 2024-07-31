@@ -2,12 +2,12 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const fs = require('fs');
 const createCsvWriter = require('csv-writer').createObjectCsvWriter;
-const cors = require('cors'); 
+const cors = require('cors');
 
 const app = express();
 const port = 9000;
 
-app.use(cors()); 
+app.use(cors());
 app.use(bodyParser.json());
 
 const csvWriter = createCsvWriter({
@@ -25,7 +25,7 @@ if (!fs.existsSync('logs.csv')) {
   });
 }
 
-app.post('/pushLog', (req, res) => {
+app.post('/serve/pushLog', (req, res) => {
   const { content, keyword } = req.body;
 
   if (!content || !keyword) {
@@ -45,22 +45,24 @@ app.post('/pushLog', (req, res) => {
     });
 });
 
-app.get('/downloadLogs', (req, res) => {
-  const filePath = 'logs.csv';
+app.get('/serve', (req, res) => {
+  try {
+    const filePath = 'logs.csv';
 
-  if (!fs.existsSync(filePath)) {
-    return res.status(404).send('Logs file not found.');
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).send('Logs file not found.');
+    }
+
+    res.setHeader('Content-Disposition', 'attachment; filename=logs.txt');
+    res.setHeader('Content-Type', 'text/plain');
+
+    const fileStream = fs.createReadStream(filePath);
+    fileStream.pipe(res);
+    res.send("Logs download")
+  } catch (error) {
+    res.send("FAILED")
   }
 
-  res.setHeader('Content-Disposition', 'attachment; filename=logs.txt');
-  res.setHeader('Content-Type', 'text/plain');
-
-  const fileStream = fs.createReadStream(filePath);
-  fileStream.pipe(res);
-});
-
-app.get('/',(req,res)=>{
-  res.send("HELLO")
 })
 
 app.listen(port, () => {
