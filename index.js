@@ -25,40 +25,25 @@ if (!fs.existsSync('logs.csv')) {
   });
 }
 
-app.post('/serve/pushLog', (req, res) => {
-  const { content, keyword } = req.body;
-
-  if (!content || !keyword) {
-    return res.status(400).send('Both content and keyword are required.');
-  }
-
-  const record = [{ content: content, keyword: keyword }];
-
-  csvWriter.writeRecords(record)
-    .then(() => {
-      console.log('Record added to logs.csv');
-      res.send('Record added successfully.');
-    })
-    .catch(err => {
-      console.error('Error writing to CSV', err);
-      res.status(500).send('Error writing to CSV');
-    });
-});
-
-app.get('/serve', (req, res) => {
+app.post('/', (req, res) => {
   try {
-    const filePath = 'logs.csv';
+    const { content, keyword } = req.body;
 
-    if (!fs.existsSync(filePath)) {
-      return res.status(404).send('Logs file not found.');
+    if (!content || !keyword) {
+      return res.status(400).send('Both content and keyword are required.');
     }
 
-    res.setHeader('Content-Disposition', 'attachment; filename=logs.txt');
-    res.setHeader('Content-Type', 'text/plain');
+    const record = [{ content: content, keyword: keyword }];
 
-    const fileStream = fs.createReadStream(filePath);
-    fileStream.pipe(res);
-    res.send("Logs download")
+    csvWriter.writeRecords(record)
+      .then(() => {
+        console.log('Record added to logs.csv');
+        res.send('Record added successfully.');
+      })
+      .catch(err => {
+        console.error('Error writing to CSV', err);
+        res.status(500).send('Error writing to CSV');
+      });
   } catch (error) {
     res.send("FAILED")
   }
