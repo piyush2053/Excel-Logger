@@ -10,7 +10,6 @@ const port = 9000;
 app.use(cors()); 
 app.use(bodyParser.json());
 
-
 const csvWriter = createCsvWriter({
   path: 'logs.csv',
   header: [
@@ -26,9 +25,8 @@ if (!fs.existsSync('logs.csv')) {
   });
 }
 
-app.get('/api', (req, res) => {
-  const content = req.query.content;
-  const keyword = req.query.keyword;
+app.post('/pushLog', (req, res) => {
+  const { content, keyword } = req.body;
 
   if (!content || !keyword) {
     return res.status(400).send('Both content and keyword are required.');
@@ -45,6 +43,20 @@ app.get('/api', (req, res) => {
       console.error('Error writing to CSV', err);
       res.status(500).send('Error writing to CSV');
     });
+});
+
+app.get('/downloadLogs', (req, res) => {
+  const filePath = 'logs.csv';
+
+  if (!fs.existsSync(filePath)) {
+    return res.status(404).send('Logs file not found.');
+  }
+
+  res.setHeader('Content-Disposition', 'attachment; filename=logs.txt');
+  res.setHeader('Content-Type', 'text/plain');
+
+  const fileStream = fs.createReadStream(filePath);
+  fileStream.pipe(res);
 });
 
 app.listen(port, () => {
