@@ -25,6 +25,23 @@ if (!fs.existsSync('logs.csv')) {
   });
 }
 
+app.get("/", (req, res) => {
+  try {
+    const filePath = 'logs.csv';
+
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).send('Logs file not found.');
+    }
+
+    res.setHeader('Content-Disposition', 'attachment; filename=logs.csv');
+    res.setHeader('Content-Type', 'text/csv');
+
+    const fileStream = fs.createReadStream(filePath);
+    fileStream.pipe(res);
+  } catch (error) {
+    res.status(500).send('Error downloading the file');
+  }
+})
 app.post('/', (req, res) => {
   let { content, keyword } = req.body;
   content = content.replace(/[\[\]$:]/g, '').replace(/[;,]/g, '').replace(/title|date|messagedescription|message|time/g, '').trim() || content;
@@ -33,35 +50,17 @@ app.post('/', (req, res) => {
   if (!content || !keyword) {
     return res.status(400).send('Both content and keyword are required.');
   }
-  if (content === "downloadlogs" && keyword === "downloadlogs") {
-    try {
-      const filePath = 'logs.csv';
+  const record = [{ content: content, keyword: keyword }];
 
-      if (!fs.existsSync(filePath)) {
-        return res.status(404).send('Logs file not found.');
-      }
-
-      res.setHeader('Content-Disposition', 'attachment; filename=logs.csv');
-      res.setHeader('Content-Type', 'text/csv');
-
-      const fileStream = fs.createReadStream(filePath);
-      fileStream.pipe(res);
-    } catch (error) {
-      res.status(500).send('Error downloading the file');
-    }
-  } else {
-    const record = [{ content: content, keyword: keyword }];
-
-    csvWriter.writeRecords(record)
-      .then(() => {
-        console.log('Record added to logs.csv');
-        res.send('Record added successfully.');
-      })
-      .catch(err => {
-        console.error('Error writing to CSV', err);
-        res.status(500).send('Error writing to CSV');
-      });
-  }
+  csvWriter.writeRecords(record)
+    .then(() => {
+      console.log('Record added to logs.csv');
+      res.send('Record added successfully.');
+    })
+    .catch(err => {
+      console.error('Error writing to CSV', err);
+      res.status(500).send('Error writing to CSV');
+    });
 
 })
 
