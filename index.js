@@ -14,7 +14,9 @@ const csvWriter = createCsvWriter({
   path: 'logs.csv',
   header: [
     { id: 'content', title: 'CONTENT' },
-    { id: 'keyword', title: 'KEYWORD' }
+    { id: 'keyword', title: 'KEYWORD' },
+    { id: 'time', title: 'TIME' }
+
   ],
   append: true
 });
@@ -50,7 +52,7 @@ app.post('/', (req, res) => {
   if (!content || !keyword) {
     return res.status(400).send('Both content and keyword are required.');
   }
-  const record = [{ content: content, keyword: keyword }];
+  const record = [{ content: content, keyword: keyword, time: new Date().toISOString()}];
 
   csvWriter.writeRecords(record)
     .then(() => {
