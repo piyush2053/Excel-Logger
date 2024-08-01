@@ -26,43 +26,41 @@ if (!fs.existsSync('logs.csv')) {
 }
 
 app.post('/', (req, res) => {
-  try {
-    const { content, keyword } = req.body;
-    if (!content || !keyword) {
-      return res.status(400).send('Both content and keyword are required.');
-    }
-    if (content === "downloadlogs" && keyword === "downloadlogs") {
-      try {
-        const filePath = 'logs.csv';
+  let { content, keyword } = req.body;
+  content = content.replace(/[\[\]$:]/g, '').replace(/[;,]/g, '').replace(/title|date|messagedescription|message|time/g, '').trim() || content;
+  keyword = keyword.replace(/\[\d+K\]/g, '').trim() || keyword
 
-        if (!fs.existsSync(filePath)) {
-          return res.status(404).send('Logs file not found.');
-        }
+  if (!content || !keyword) {
+    return res.status(400).send('Both content and keyword are required.');
+  }
+  if (content === "downloadlogs" && keyword === "downloadlogs") {
+    try {
+      const filePath = 'logs.csv';
 
-        res.setHeader('Content-Disposition', 'attachment; filename=logs.csv');
-        res.setHeader('Content-Type', 'text/csv');
-
-        const fileStream = fs.createReadStream(filePath);
-        fileStream.pipe(res);
-      } catch (error) {
-        res.status(500).send('Error downloading the file');
+      if (!fs.existsSync(filePath)) {
+        return res.status(404).send('Logs file not found.');
       }
-    } else {
-      const record = [{ content: content, keyword: keyword }];
 
-      csvWriter.writeRecords(record)
-        .then(() => {
-          console.log('Record added to logs.csv');
-          res.send('Record added successfully.');
-        })
-        .catch(err => {
-          console.error('Error writing to CSV', err);
-          res.status(500).send('Error writing to CSV');
-        });
+      res.setHeader('Content-Disposition', 'attachment; filename=logs.csv');
+      res.setHeader('Content-Type', 'text/csv');
+
+      const fileStream = fs.createReadStream(filePath);
+      fileStream.pipe(res);
+    } catch (error) {
+      res.status(500).send('Error downloading the file');
     }
+  } else {
+    const record = [{ content: content, keyword: keyword }];
 
-  } catch (error) {
-    res.send("FAILED")
+    csvWriter.writeRecords(record)
+      .then(() => {
+        console.log('Record added to logs.csv');
+        res.send('Record added successfully.');
+      })
+      .catch(err => {
+        console.error('Error writing to CSV', err);
+        res.status(500).send('Error writing to CSV');
+      });
   }
 
 })
