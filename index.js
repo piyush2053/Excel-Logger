@@ -28,6 +28,7 @@ if (!fs.existsSync('logs.csv')) {
 }
 
 app.get("/", (req, res) => {
+  console.log("Downloading logs ....")
   try {
     const filePath = 'logs.csv';
 
