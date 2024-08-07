@@ -13,12 +13,12 @@ app.use(bodyParser.json());
 const csvWriter = createCsvWriter({
   path: 'logs.csv',
   header: [
-    { id: 'content', title: 'CONTENT' },
-    { id: 'keyword', title: 'KEYWORD' },
-    { id: 'time', title: 'TIME' }
-
+    {id: 'content', title: 'Content'},
+    {id: 'keyword', title: 'Keywords'},
+    {id: 'volume', title: 'Volume'},
+    {id: 'date', title: 'Date'}
   ],
-  append: true
+  append:true
 });
 
 if (!fs.existsSync('logs.csv')) {
@@ -47,13 +47,36 @@ app.get("/", (req, res) => {
 })
 app.post('/', (req, res) => {
   let { content, keyword } = req.body;
-  content = content.replace(/[\[\]$:]/g, '').replace(/[;,]/g, '').replace(/title|date|messagedescription|message|time/g, '').trim() || content;
-  keyword = keyword.replace(/\[\d+K\]/g, '').trim() || keyword
+  content = content.replace(/[\[\]$:]/g, '')
+                   .replace(/[;,]/g, '')
+                   .replace(/title|date|messagedescription|message|time/g, '')
+                   .trim() || content;
 
   if (!content || !keyword) {
     return res.status(400).send('Both content and keyword are required.');
   }
-  const record = [{ content: content, keyword: keyword, time: new Date().toISOString()}];
+  const keywordVolumePairs = keyword.match(/\b(\w+[\s\w]*)\s+\[(\d+(?:\.\d+)?[KkMm]?)\]/g) || [];
+  const keywords = [];
+  const volumes = [];
+
+  keywordVolumePairs.forEach(pair => {
+    const match = pair.match(/(\w+[\s\w]*)\s+\[(\d+(?:\.\d+)?[KkMm]?)\]/);
+    if (match) {
+      keywords.push(match[1].trim());
+      volumes.push(match[2].toUpperCase().replace('K', '000').replace('M', '000000'));
+    }
+  });
+
+  if (keywords.length === 0 || volumes.length === 0) {
+    return res.status(400).send('No valid keyword-volume pairs found.');
+  }
+
+  const record = [{
+    content: content,
+    keyword: keywords.join(', '),
+    volume: volumes.join(', '),
+    date: new Date().toISOString().split('T')[0]
+  }];
 
   csvWriter.writeRecords(record)
     .then(() => {
@@ -64,8 +87,9 @@ app.post('/', (req, res) => {
       console.error('Error writing to CSV', err);
       res.status(500).send('Error writing to CSV');
     });
+});
 
-})
+
 
 app.listen(port, () => {
   console.log(`Server running at ${port}`);
